@@ -26,7 +26,16 @@ webhookRouter.post("/", (req: Request, res: Response) => {
   // Răspundem imediat 200 ca Meta să nu retrimită; procesăm asincron.
   res.sendStatus(200);
 
-  processWebhook(req.body).catch(err => console.error("[webhook] Processing error:", err));
+  const work = processWebhook(req.body).catch(err => console.error("[webhook] Processing error:", err));
+
+  // Pe Vercel, funcția serverless îngheață după răspuns — waitUntil ține procesarea în viață.
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { waitUntil } = require("@vercel/functions");
+    waitUntil(work);
+  } catch {
+    /* mediu non-Vercel (Railway/local): promise-ul rulează normal în fundal */
+  }
 });
 
 async function processWebhook(body: any): Promise<void> {

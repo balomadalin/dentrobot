@@ -3,12 +3,10 @@ import { Pool } from "pg";
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
-  console.error(
-    "[db] ❌ DATABASE_URL nu este setat!\n" +
-    "     În Railway: serviciul dentrobot → Variables → New Variable →\n" +
-    "     Name: DATABASE_URL, Value: ${{Postgres.DATABASE_URL}} (Add Reference)"
+  throw new Error(
+    "[db] DATABASE_URL nu este setat! Adaugă variabila de mediu DATABASE_URL " +
+    "(Vercel: Project Settings → Environment Variables; Railway: Add Reference la Postgres)."
   );
-  process.exit(1);
 }
 
 // Rețeaua internă Railway (*.railway.internal) și localhost nu folosesc SSL.
