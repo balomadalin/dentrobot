@@ -11,8 +11,9 @@ webhookRouter.get("/", (req: Request, res: Response) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
+  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || "dentrobot-verify-2026";
 
-  if (mode === "subscribe" && token === process.env.WHATSAPP_VERIFY_TOKEN) {
+  if (mode === "subscribe" && token === verifyToken) {
     console.log("[webhook] Verified by Meta");
     res.status(200).send(challenge);
   } else {
