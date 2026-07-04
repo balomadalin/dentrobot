@@ -1,9 +1,24 @@
 import { Pool } from "pg";
 
-export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_SSL === "false" ? false : { rejectUnauthorized: false },
-});
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  console.error(
+    "[db] ❌ DATABASE_URL nu este setat!\n" +
+    "     În Railway: serviciul dentrobot → Variables → New Variable →\n" +
+    "     Name: DATABASE_URL, Value: ${{Postgres.DATABASE_URL}} (Add Reference)"
+  );
+  process.exit(1);
+}
+
+// Rețeaua internă Railway (*.railway.internal) și localhost nu folosesc SSL.
+const isInternal = /railway\.internal|localhost|127\.0\.0\.1/.test(connectionString);
+const useSsl =
+  process.env.DATABASE_SSL === "false" || isInternal
+    ? false
+    : { rejectUnauthorized: false };
+
+export const pool = new Pool({ connectionString, ssl: useSsl });
 
 export async function migrate(): Promise<void> {
   await pool.query(`
